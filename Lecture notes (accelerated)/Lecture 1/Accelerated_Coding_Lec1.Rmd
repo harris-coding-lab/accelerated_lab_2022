@@ -53,12 +53,12 @@ library(readxl)
 
 ## Gauging your background 
 
-What experience are you entering with?
+Most of you have some data experience. What are you bringing?
 
 - Excel / Sheets
 - Stata
-- Python 
 - R
+- Python 
 - C++? Julia? SPSS? SAS? Other software / languages? 
 - Excited for a challenge?
 
@@ -67,18 +67,18 @@ What experience are you entering with?
 - R is a powerful programming language and statistical software environment
     - Great data manipulation and visualization suite
     - Strong statistical packages (e.g. program evaluation, machine learning)
-
-- Complete programming language with low barriers to entry
 - Open source and free
+- Complete programming language with low barriers to entry
+
 - We will use R for the entire Stats sequence in Fall and Winter
 
 ## What will we cover?
 
-0. Motivation/Installation of R
-1. Installing Packages and Reading Data
-2. Basic Data Manipulation and Analysis
-3. Data Visualization 
-4. More on Data Manipulation
+0. Motivation/Installation of R *[Today]*
+1. Installing Packages and Reading Data *[Today]*
+2. Basic Data Manipulation and Analysis *[3]*
+3. Data Visualization *[1]*
+4. More on Data Manipulation *[3]*
     - Grouped Analysis, Iteration, Functions
 
 - In Stats 1/2 and other courses, you will build off of these lessons:
@@ -86,7 +86,10 @@ What experience are you entering with?
     - introduce statistics functions
     - introduce new packages and tools based on needs
 
+This is just the beginning of your programming journey!
+
 ## Learning philosophy
+
 
 - We learn coding by experimenting with code
 
@@ -98,7 +101,6 @@ What experience are you entering with?
 
 - Coding lab is for you
 
-- This is just the beginning of your programming journey!
 
 
 ## How will we progress?
@@ -129,7 +131,8 @@ What experience are you entering with?
   - Pick a data set aligned with your policy interests (or not)
   - Use programming skills to engage with data and make a data visualization showing something you learned from the data
   
-## An Example
+## Final project goal
+
   ![](./images/line_chart.png){}
 
 ## Textbooks and Resources
@@ -145,7 +148,8 @@ What experience are you entering with?
 ## Textbooks and Resources
   ![](./images/textbook_3.png){}    
 
-- Stack Overflow is your another friend!
+- Stack Overflow is your another friend! 
+- ... In homework, give credit where it's due.
 
 # Using R and RStudio
 
@@ -198,6 +202,7 @@ what objects you have in your R session
 
 ## RStudio Layout
   ![](./images/rstudio_2.png){}    
+
 ## Executing commands in R
 
 Three ways to execute commands in R:
@@ -246,7 +251,7 @@ sqrt(4)  # square root of 4
 
 ```{r eval=FALSE, echo=FALSE}
 # answer
-30 + 6*5^{8} - log(50)
+30 + 6*5^8 - log(50)
 (-1)^2 * (8 - sqrt(16)) # ambiguous (-1)^2 or -1^2
 568*135/log(1)
 (15^{0} - 1)/0
@@ -258,7 +263,7 @@ sqrt(4)  # square root of 4
 
 ```{r}
 # answer
-30 + 6*5^{8} - log(50)
+30 + 6*5^8 - log(50)
 (-1)^2 * (8 - sqrt(16)) # ambiguous (-1)^2 or -1^2
 568*135/log(1)
 (15^{0} - 1)/0
@@ -300,9 +305,9 @@ These are also binary operators; they take two objects, and give back a \textit{
 7 != 5 # inequality (read as "is not equal to")
 ```
 
-Notice: == is a comparison operator, = is an assignment operator
+Notice: `==` is a comparison operator, `=` is an assignment operator
 
-## `&` (and)
+## `&` (and): Return `TRUE` if **all** terms are true.
 
 - TRUE & TRUE -> `TRUE`
 - TRUE & FALSE -> `FALSE`
@@ -315,7 +320,7 @@ Notice: == is a comparison operator, = is an assignment operator
 (5 > 7) & (6 * 7 == 42)
 ```
 
-## `|` (or)
+## `|` (or):  Return `TRUE` if **any** terms are true.
 
 - TRUE | FALSE -> `TRUE`
 - FALSE | TRUE -> `TRUE`
@@ -325,7 +330,7 @@ Notice: == is a comparison operator, = is an assignment operator
 ```{r}
 (5 < 7) | (6 * 7 < 42)
 (5 > 7) | (6 * 7 == 42)
-(5 < 7) | (6 * 7 == 42)
+(5 > 7) | (6 * 7 != 42)
 ```
 
 
@@ -384,6 +389,7 @@ x
 
 ```{r}
 # comments help us remember ...
+my_number <- 4
 my_number - 10 # This should be equal to -6
 ```
 
@@ -394,7 +400,8 @@ my_number - 10 # This should be equal to -6
 We can re-assign a variable as we wish. This is useful if we want to try the same math with various different numbers.
 ```{r eval=FALSE}
 my_number <- 2
-my_output <- sqrt((12 * my_number) + 1) 
+
+sqrt((12 * my_number) + 1) 
 ```
 
 
@@ -439,7 +446,10 @@ f <- function(x, y) {
 e.g. `f` is a function that expects `x` and `y` and returns `2*x + y`
 
 ```{r}
+# 2 * 7  + 0 = 14
 f(7, 0)
+
+# 2 * 0  + 7 = 7
 f(y = 7, x = 0)
 ```
 
@@ -579,14 +589,14 @@ head(storms)
 
 Say you find a spreadsheet on the internet and want to start exploring it with R.
 
-Sometimes loading data is as easy as
+Loading data is as easy as
 
 ```{r, eval=FALSE}
 library(readr)
 housing_data <- read_csv("texas_housing_data.csv")
 ```
 
-But often you'll need to consider:
+This requires that you consider:
 
   - File type
   - File location
@@ -594,7 +604,7 @@ But often you'll need to consider:
   
 ## Loading data of various formats
 
-Most common formats and 
+Most common formats and their readers.
 
 file type  | package  | function 
 -----------|----------|-------------
@@ -715,3 +725,17 @@ We learned
 - How to navigate the file structure (`getwd()`, `setwd()`)
 - How to programatically read data in to R
 - How to get basic "see" data 
+
+
+## Next up
+
+Lab sessions:
+
+- *today*: Review today's material
+- *tomorrow*: Learn about Rmds. Load data (for your final project). 
+
+- Progress marker: I can load *relevant* policy data into R. 
+
+Lecture:
+
+- *Thursday*: Vectors + data types & Data in base R
