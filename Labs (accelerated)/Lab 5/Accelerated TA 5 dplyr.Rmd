@@ -6,9 +6,6 @@ urlcolor: blue
 output:
   pdf_document:
     toc: yes
-  html_notebook:
-    toc: yes
-    toc_float: yes
 ---
 
 ```{r setup, include = FALSE}
@@ -23,7 +20,7 @@ Complete the following lab in an Rmd. In your `setup` chunk, load tidyverse and 
 
 <!-- TODO: UPDATE FILE LINK!!! -->
 
-We'll work with the following [`data set`](https://github.com/harris-coding-lab/harris-coding-lab.github.io/blob/master/fall_labs/reading-files/data/area_report_by_year.xlsx?raw=true). Download it and put the data in the appropriate folder. The data comes from the [NY Fed](https://www.newyorkfed.org/microeconomics/databank.html)
+We'll work with the following [`data set`](https://github.com/harris-coding-lab/accelerated_lab_2022/raw/main/Labs%20(accelerated)/Lab%205/data/area_report_by_year.xlsx?raw=true). Download it and put the data in the appropriate folder. The data comes from the [NY Fed databank](https://www.newyorkfed.org/microeconomics/databank.html)
 
 
 
@@ -203,9 +200,9 @@ write_csv(student_loan_debt, "data/student_loan_debt.csv")
 
 We write the cleaned data to a CSV (comma-separated variables file).
 
-<!-- TODO: CHANGE LINK -->
 
-Try running this code locally on your computer! If it fails, the csv is [here](https://github.com/harris-coding-lab/harris-coding-lab.github.io/blob/master/fall_labs/reading-files/data/student_loan_debt.csv) and you can load it now.
+
+Try running this code locally on your computer! If it fails, the csv is [here](https://raw.githubusercontent.com/harris-coding-lab/accelerated_lab_2022/main/Labs%20(accelerated)/Lab%205/data/student_loan_debt.csv) and you can load by reading the csv directly from the url.
 
 
 ## Exploratory Data Analysis
@@ -343,7 +340,7 @@ student_loan_debt %>%
 
 We saw that DC has the highest level of per-capita student loan debt. However, you might wonder how much *total* student debt is held by the capital's residents. To tackle this, we need a population dataset. Fortunately, in the `area_report_by_year.xlsx` there is a sheet called "population", which refers to the number of individuals over 18 years of age who have a credit report with Equifax.
 
-1. The data is stored in exactly the same way as the student loan data. This implies you can reuse the code from before with a few (precisely 2) modifications. Copy and paste your code from before and make the modifications. The  result looks like this:
+1. The data is stored in exactly the same way as the student loan data.^[If you had to download our csv, here's the [link for population.csv](https://raw.githubusercontent.com/harris-coding-lab/accelerated_lab_2022/main/Labs%20(accelerated)/Lab%205/data/population.csv)] This implies you can reuse the code from before with a few (precisely 2) modifications. Copy and paste your code from before and make the modifications. The  result looks like this:
 
 ![](images/05_pop.jpg){width=30%}
 
