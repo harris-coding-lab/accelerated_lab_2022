@@ -196,7 +196,7 @@ Let's start with a simpler example -- this is a good way to get intuition for wh
     top_ten[order(top_ten$poptotal, decreasing = TRUE), ] 
     ```
 
-    ## II. Investigate the `diamonds` dataset
+## II. Investigate the `diamonds` dataset
 
 Throughout this exercise, we will be working with the `diamonds` dataset (comes with `tidyverse`), which contains the prices and other attributes of almost 54,000 diamonds. (use `?diamonds` to see the codebook.)
 

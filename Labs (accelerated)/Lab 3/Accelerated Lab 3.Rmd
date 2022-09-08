@@ -1,5 +1,5 @@
 ---
-title: 'Lab Session 2: Vectors and Data Types'
+title: 'Lab Session 3: Vectors and Data Types'
 author: "Ari Anisfeld"
 date: "8/31/2020"
 output: 
@@ -23,7 +23,7 @@ library(tidyverse)
     a. Create an integer vector from seven to seventy.
     b. Create a numeric vector with 60 draws from the `r`andom `unif`orm distribution 
     c. Create a character vector with the letter "x" repeated 1980 times.
-    d. Create a character vector of length 5 with the items "Nothing" "will" "work" "unless" "you" "do". Call this vector `angelou_quote` using `<-`.
+    d. Create a character vector of length 6 with the items "Nothing" "will" "work" "unless" "you" "do". Call this vector `angelou_quote` using `<-`.
     e. Create a numeric vector with 1e4 draws^[This is scientific notation. Try `1e4 - 1 + 1` in the console.] from a standard `norm`al distribution.
     f. Create an integer vector with the numbers 0, 2, 4, ... 20.
 
