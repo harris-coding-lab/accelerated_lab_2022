@@ -223,7 +223,7 @@ Here are the rules. They want to go to school where their test scores are within
       filter(abdul_choices, stephens_choices, ...)
     ```
 
-    Test out the concept with a simple example. For example, try to figure out Abdul's only condition of being Ivy Plus. If time permits, also try to figure out Stephen's only condition of not being a publi school.
+    Test out the concept with a simple example. For example, try to figure out Abdul's only condition of being Ivy Plus. If time permits, also try to figure out Stephen's only condition of not being a public school.
 
 1. Now you're ready to find the college for the five friends.
 
