@@ -1,5 +1,5 @@
 ---
-title: "Accelerated Coding Lab: More data manipulation"
+title: "Solutions Accelerated Coding Lab: More data manipulation"
 author: "Ari Anisfeld"
 date: "09-04-2022"
 urlcolor: blue
@@ -11,7 +11,9 @@ output:
 ```{r, include = FALSE}
 library(tidyverse)
 library(readxl)
-wid_data_raw <-   read_xlsx("../data/world_wealth_inequality.xlsx")
+wid_data_raw <-   read_xlsx("../data/world_wealth_inequality.xlsx",
+                        col_names = c("country", "indicator", "percentile", "year", "value")) %>%
+      separate(indicator, sep = "[\\r]?\\n", into = c("row_tag", "type", "notes", "empty")) 
 ```
 
 
@@ -62,9 +64,12 @@ Note: if you try to knit code that produces an error, your knitting will fail. Y
 3. Ari didn't know that `order()` could accept multiple column names! Google "sorting by multiple columns in base r" to help him convert the following code into base R. 
 
 ```{r}
-txhousing %>%
-  arrange(desc(year), month, desc(sales)) %>%
-  head(3)
+# SOLUTION
+identical(
+  txhousing %>%
+    arrange(desc(year), month, desc(sales)), 
+  txhousing[order(-txhousing$year, txhousing$month, -txhousing$sales),]
+)
 ```
 4. a. What does the `distinct(midwest, state)` do? 
    b. What does `unique(midwest$state)`? 
@@ -72,18 +77,27 @@ txhousing %>%
    d. Which function do you think is from `dplyr` and what are some patterns that make it similar to the `dplyr` verbs?
 
 
+  *Solution:* Both functions isolate the distinct/unique states in the `midwest` data. `distinct` is a dplyr function; like other dplyr functions it takes data in the first position and accepts `...` afterwards, an arbitrary number of columns, and returns a dataset. `unique` takes a vector as input and returns a vector.
+
 5. Which of the following code works? Can you think of two additional strategies to get filter the data so we only have data from IA, IL, MI and WI using `filter`?^[*Hint* one strategy we discussed in class; for the second strategy, look at the previous problem.]
 
 ```{r, eval = FALSE}
+# SOLUTION
 midwest %>%
   filter(state == "IA", "IL", "MI", "WI")
 
 midwest %>%
   filter(state == c("IA", "IL", "MI", "WI"))
 
+# This one works!
 midwest %>%
   filter(state == "IA"| state ==  "IL"|
          state == "MI"| state =="WI")
+
+# Two other options
+filter(midwest, state %in% c("IA", "IL", "MI", "WI")),
+filter(midwest, ! state %in% c("IN", "OH"))
+
 ```
 
 
@@ -102,6 +116,13 @@ subset(txhousing, month %in% c(12, 1, 2) &
                  between(year, 2013, 2016) & 
                   volume > 1e9,
        select = c(city, year, month, volume, listings))
+
+# SOLUTION
+txhousing %>%
+  filter(month %in% c(12, 1, 2),
+        between(year, 2013, 2016),
+        volume > 1e9) %>%
+  select(city, year, month, volume, listings)
 ```
 2. `within` is a doppelganger of `mutate` with peculiar syntax. Convert the following code to `dplyr`
 
@@ -111,6 +132,13 @@ within(txhousing[c("city", "year", "month", "volume", "sales", "median")], {
   best_month_sales_price <- max(mean_sales_price, na.rm=TRUE)
   percent_of_best <- mean_sales_price / best_month_sales_price
 })
+
+# Solution
+txhousing %>%
+  select(city, year, month, volume, sales, median) %>%
+  mutate(mean_sales_price = round(volume / sales),
+         best_month_sales_price = max(mean_sales_price, na.rm=TRUE),
+         percent_of_best = mean_sales_price / best_month_sales_price)
 ```
 
 3. *A recipe for unreadable code and difficult debugging.*  The following code is poor quality because it's difficult for other humans (including future you) to read. What makes it hard to read? 
@@ -132,6 +160,26 @@ ds <- subset(within(txhousing[order(-txhousing$volume),],
       select = c(city, year, month, msp, msp_diff_m, volume))
 
 head(ds)
+
+
+# Better style
+temp <- txhousing[order(-txhousing$volume),]
+temp <- within(temp, {
+               mean_sales_price <- round(volume / sales)
+               diff_mean_median <- abs(mean_sales_price - median)
+               })
+temp <- subset(temp,
+      city == "Houston" & 
+      (year == 2014  | year == 2015 | year == 2013),
+      select = c(city, year, month, mean_sales_price, diff_mean_median, volume))
+head(temp)
+
+txhousing %>%
+  arrange(desc(volume)) %>%
+  mutate(mean_sales_price = round(volume / sales),
+         diff_mean_median = abs(mean_sales_price - median)) %>%
+  filter(city == "Houston", (year == 2014  | year == 2015 | year == 2013)) %>%
+  select(c(city, year, month, mean_sales_price,  diff_mean_median, volume))
 ```
 
 
@@ -217,13 +265,6 @@ wid_data_raw <-
 
 ```
 
-```{r, include = FALSE}
-  wid_data_raw <- 
-      readxl::read_xlsx("~/repo/harris-coding-lab.github.io/data/world_wealth_inequality.xlsx", 
-                        col_names = c("country", "indicator", "percentile", "year", "value")) %>%
-      separate(indicator, sep = "[\\r]?\\n", into = c("row_tag", "type", "notes", "empty")) 
-```
-
 
 ### clean-up
 
@@ -235,14 +276,16 @@ Now we have some data and are ready to use `select()`, `filter()`, `mutate()`, `
 
 1. The data comes with some redundant columns that add clutter when we examine the data.  What `dplyr` verb let's you choose what columns to see?  Remove the unwanted column `row_tag` and `empty` and assign the output to the name `wid_data`.
 
-    ```{r, include = FALSE}
+    ```{r, include = TRUE}
+    # SOLUTION
     wid_data <- wid_data_raw %>% select(-c(row_tag, empty))
     ```
 
 1. Let's start to dig into the data. We have two `type`s of data: "Net personal wealth" and
 "National income". Let's focus on "Net personal wealth" for France. Create a data set called `french_data` with the desired rows and then run the code below to visualize the data.^[We expect to see 4 lines and to get a message about several warnings.] 
 
-```{r, echo = FALSE}
+```{r, echo = TRUE}
+# SOLUTION
 french_data <- wid_data %>% 
                 filter(type == "Net personal wealth", country == "France") %>%
                 mutate(perc_national_wealth = value * 100)
@@ -251,7 +294,8 @@ russian_data <- wid_data %>%
   mutate(perc_national_wealth = value * 100)
 ```
 
-```{r, eval = FALSE}
+```{r, eval = TRUE}
+# SOLUTION
 french_data %>%
   ggplot(aes(y = value, x = year, color = percentile)) +
     geom_line()  + 
@@ -262,24 +306,30 @@ Now we're getting somewhere! The plot shows the proportion of national wealth ow
 
 1. Explain the gaps in the plot. Using `filter()`, look at `french_data` in the years between 1960 and 1970. Does what you see line up with what you guessed by looking at the graph?
 
-```{r, include = FALSE}
+```{r, eval = FALSE}
+# SOLUTION
 french_data %>%
-  filter(between(year, 1960, 1970)) # short cut for   1960 >= x &x =< 1970
+  filter(between(year, 1960, 1970)) # short cut for   1960 >= x & x =< 1970
 ```
 
 
 1. Create a new column called `perc_national_wealth` that equals `value` multiplied by 100. Adjust the graph code so that the y axis shows `perc_national_wealth` instead of `value`.
 
-```{r, include = FALSE}
-# See above
+```{r, include = TRUE}
+# Solution: See above
 ```
 
 
 1. Now following the same steps, explore data from the "Russian Federation". 
 
+```{r, include = TRUE}
+# Solution: See above
+```
+
 1. The data for "Russian Federation" does not start in 1900, but our y-axis does. That's because we have a bunch of `NA`s. Filter out the `NA`s and remake the plot. 
 
-```{r, include = FALSE}
+```{r, include = TRUE}
+# SOLUTION
 russian_data %>%
   filter(!is.na(value)) %>%
   ggplot(aes(y = perc_national_wealth, x = year, color = percentile)) +
@@ -290,7 +340,8 @@ russian_data %>%
 
 1. What year did the bottom 50 percent hold the least wealth? What year did the middle 40 percent hold the most wealth?
 
-```{r, include = FALSE}
+```{r, include = TRUE}
+# SOLUTION
 russian_data %>%
   filter(percentile == "p0p50") %>%
   arrange(value) %>%
@@ -304,7 +355,8 @@ russian_data %>%
   select(percentile, year)
 ```
 
-```{r, include = FALSE}
+```{r, include = TRUE}
+# SOLUTION
 russian_data %>% 
   # this step is logical, but not necessary in practice
   filter(percentile == "p0p50") %>%
@@ -323,7 +375,8 @@ russian_data %>%
 
 1. How many years does the Russian top 1 percent control more money then the 90th to 99th percentile?^[Suggestion: you may need to work with vectors directly.]
 
-```{r, include = FALSE}
+```{r, include = TRUE}
+# SOLUTION
 top1 <- russian_data %>%
   filter(percentile == "p99p100") %>%
   pull(perc_national_wealth)
@@ -339,7 +392,8 @@ sum(top10 - top1 > top1, na.rm = TRUE)
 
 1. For both the Russian Federation and French data, calculate the average of the proportion of wealth owned by the top 10 percent over the period from 1995 to 2010. You'll have to choose the relevant rows and then summarize with `summarize()`.
 
-```{r, echo = FALSE, eval = FALSE}
+```{r, echo = TRUE, eval = FALSE}
+# SOLUTION
 french_data %>% 
   filter(percentile == "p90p100") %>% 
   filter(between(year, 1995, 2010)) %>% 
@@ -368,7 +422,7 @@ wid_data %>%
 We'll return to this idea soon, but take some time to experiment with it. 
 
 
-3. The base R analog is `aggregate` here's two exampels of getting the "mean perc_national_weath"
+3. The base R analog is `aggregate` here's two examples of getting the "mean perc_national_weath"
 
 ```{r}
 
