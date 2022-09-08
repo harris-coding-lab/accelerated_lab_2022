@@ -13,6 +13,12 @@ output:
 library(tidyverse)
 library(readr)
 options(dplyr.summarise.inform = FALSE) # Suppress summarize info in dplyr >= 1.0
+
+russian_data <- readxl::read_xlsx("../../Labs (accelerated)/Data/world_wealth_inequality.xlsx",
+                         col_names = c("country", "indicator", "percentile", "year", "value")) %>% 
+  separate(indicator, sep = "[\\r]?\\n",
+          into = c("row_tag", "type", "notes", "empty"))  %>%
+  filter(country == "Russian Federation", !is.na(value))
 ```
 
 ## Review: Subsetting data
@@ -30,6 +36,75 @@ data %>%
 
 \footnotesize
 *Remark*: You may also see base R's `subset()`
+
+## Review: Subsetting data
+
+Question will these two `filter()` calls produce the same result?
+
+```{r, eval = FALSE}
+russian_data %>%
+  filter(percentile == "p0p50",
+         value == max(value, na.rm = TRUE))
+
+russian_data %>%
+  filter(percentile == "p0p50") %>%
+  filter(value == max(value, na.rm = TRUE)) 
+```
+
+## Review: Subsetting data
+
+Question will these two `filter()` calls produce the same result? No.
+Why not?
+
+```{r, eval = FALSE}
+identical(
+russian_data %>%
+  filter(percentile == "p0p50",
+         value == max(value, na.rm = TRUE)),
+russian_data %>%
+  filter(percentile == "p0p50") %>%
+  filter(value == max(value, na.rm = TRUE)) 
+)
+```
+
+
+## Review: Subsetting data
+
+Question will these two `filter()` calls produce the same result? No.
+Why not? 
+
+```{r, eval = FALSE}
+russian_data %>%
+  filter(percentile == "p0p50", # <- this , is like &
+         value == max(value, na.rm = TRUE))
+
+# this is the max for ALL income groups.
+max(russian_data$value, na.rm = TRUE) 
+
+
+```
+
+## Review: Subsetting data
+\footnotesize
+Here, we use the `max()` on the bottom half only.
+
+```{r, eval = FALSE}
+russian_data %>%
+  filter(percentile == "p0p50") %>%
+  filter(value == max(value, na.rm = TRUE)) 
+```
+
+We could rewrite the code like so.
+
+```{r}
+bottom_half <- russian_data %>%
+  filter(percentile == "p0p50") 
+
+# this is the max for the bottom half income groups.
+bottom_half %>% 
+  filter(value == max(value, na.rm = TRUE)) 
+```
+
 
 
 ## Review: Sorting data
@@ -540,9 +615,9 @@ txhousing %>%
   select(city, year, month, median) %>%
   mutate(housing_market = 
       ifelse(median < 100000, "first quartile",
-      ifelse(100000 <= median & median < 123800, "second quartile",
-      ifelse(123800 <= median & median < 150000, "third quartile",
-      ifelse(150000 <= median & median < 350000, "fourth quartile",
+      ifelse(median < 123800, "second quartile",
+      ifelse(median < 150000, "third quartile",
+      ifelse(median < 350000, "fourth quartile",
              NA))))
            ) %>%
   head(3)
@@ -565,9 +640,9 @@ txhousing %>%
   mutate(housing_market = 
          case_when(
            median < 100000 ~ "first quartile",
-           100000 <= median & median < 123800 ~ "second quartile",
-           123800 <= median & median < 150000 ~ "third quartile",
-           150000 <= median & median < 350000 ~ "fourth quartile"
+           median < 123800 ~ "second quartile",
+           median < 150000 ~ "third quartile",
+           median < 350000 ~ "fourth quartile"
          ))  %>%
   head(3)
 ```
@@ -582,9 +657,9 @@ txhousing %>%
   mutate(housing_market = 
         case_when(
            median < 100000 ~ 1,
-           100000 <= median & median < 123800 ~ "second quartile",
-           123800 <= median & median < 150000 ~ "third quartile",
-           150000 <= median & median < 350000 ~ "fourth quartile"
+           median < 123800 ~ "second quartile",
+           median < 150000 ~ "third quartile",
+           median < 350000 ~ "fourth quartile"
          )) %>% 
   select(city, median, housing_market)
 
@@ -596,6 +671,24 @@ Here we try to include *both* doubles and characters in the `housing_market` col
 
   - Rather than coerce and provide a warning, the developers decided to make this an error
   - If using `NA` as an output, you have to specify `NA` types e.g. `NA_integer_`, `NA_character_`
+  
+  
+  
+## `case_when` "else"
+\footnotesize
+You might wonder how to approximate `else`. 
+
+ - Use `TRUE` as a catch all. 
+
+```{r, eval = FALSE}
+example <- tibble(a = 1:12)
+
+example %>%
+  mutate(category = case_when(a %in% c(2, 3, 5, 7, 11) ~ "prime",
+                              sqrt(a) == round(sqrt(a))  ~ "square",
+                              TRUE ~ "other"))
+```
+
 
 ## Try it yourself
 \footnotesize
