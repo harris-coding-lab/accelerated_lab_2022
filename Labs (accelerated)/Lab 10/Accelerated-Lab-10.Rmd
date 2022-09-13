@@ -28,7 +28,7 @@ Finally, we provide some exposure to common misunderstandings.
 
 We can change the aesthetics of our plots by mapping data to aesthetics OR by declaring aesthetics. 
 
-```{r}
+```{r, fig.width=5, fig.height=3}
 #  declare that points should be red
 ggplot(storms, aes(wind, pressure)) + 
   # no need for a mapping = aes(...)
@@ -44,7 +44,7 @@ ggplot(storms, aes(wind, pressure)) +
 
 1. What happens if you mix it up? Run the following code and explain the errors or output.
 
-```{r, eval = FALSE}
+```{r, eval = FALSE,fig.width=5, fig.height=3}
 ggplot(storms, aes(wind, pressure)) + 
   geom_point(color = category, shape = status)
 
@@ -55,7 +55,7 @@ ggplot(storms, aes(wind, pressure)) +
 
 2. Notice that declared aesthetics are not inherited while mappings (in `aes()`) are inherited.
 
-```{r}
+```{r,fig.width=5, fig.height=3}
 ggplot(storms, aes(x = wind, y = pressure), color = "blue") + 
   geom_point() # does not inherit declared aesthetics so points are black.
 
@@ -75,8 +75,7 @@ When we use an aesthetic like color, it automatically becomes the "group" for th
 
 3. In the plot below, `geom_path()` is connecting points with the same status! But we want to see the paths of the storms. Adjust the aesthetic mapping so that we can see the paths of Rita and Katrina.
 
-```{r}
-
+```{r,fig.width=5, fig.height=3}
 storms %>% 
   filter(name == "Rita" | (name == "Katrina" & year == 2005)) %>%
   ggplot(aes(x = lat, y = long, color = status)) + 
@@ -89,8 +88,7 @@ storms %>%
 
 When you run the following code you see a message " ... using method = `gam` ..." which is a default chosen based on your data.
 
-```{r}
-
+```{r,fig.width=5, fig.height=3}
 ggplot(storms, aes(wind, pressure)) + 
   # here we map color and shape within geom_point b/c we don't want
   # those groups when we fit our model.
@@ -108,7 +106,7 @@ Most of the time the default scales for x and y, colors and other aesthetics are
 
 Here is an example where we change scales in probably not so useful ways. For good measure, we also adjust the theme in various ways. `theme_minimal()` makes a number of pre-set adjustments to how the plot is displayed.^[There are a handful of built-in themes. You'll find the whole list using `?theme_minimal`.] 
 
-```{r}
+```{r, fig.width=5, fig.height=3}
 base_plot <- storms %>%
   ggplot(aes(wind, pressure)) + 
   geom_point(aes(color = status)) + 
@@ -126,7 +124,7 @@ base_plot +
 
 6. Play with the code to make sure you understand what it's doing. Then, adjust the code to make the resulting plot. **See how close you can get before reading the explicit instructions (below).** Use `?` and google! (Don't worry about picking the right colors though.)
 
-```{r, echo = FALSE}
+```{r, echo = FALSE, fig.width=5, fig.height=3}
 
 base_plot <- storms %>%
   ggplot(aes(wind, pressure)) + 
@@ -160,7 +158,7 @@ base_plot +
 
 8. Above we used `scale_x_reverse()` which is a shortcut for `scale_x_continuous(trans = "reverse")`. With that in mind, can you replicate this plot where we reverse the order of the color gradient here?
 
-```{r, echo = FALSE}
+```{r, echo = FALSE, fig.width=5, fig.height=3}
 # Solution
 midwest %>%
   ggplot(aes(x = percollege, y = percbelowpoverty, color = percpovertyknown)) +
@@ -177,10 +175,6 @@ There are several functions used to make plots in base R. Common ones include `p
 
 In this lab, we'll provide a brief introduction to base R plotting and highlight sometimes where it is nicer to use relative to ggplot.
 
-```{r}
-
-```
-
 
 1. I will make plots in base R, your job is to produce a similar plot with ggplot. Notice how the two methods have different defaults. Switching all the defaults can be tricky. We'll highlight important things to match. Try to match anything coded explicitly. 
 
@@ -188,7 +182,7 @@ a. Here's a histogram produced in base R. Bin widths matter.
 
 Tips: Recall that in `ggplot` the color of a bar can be adjusted with `fill` for the "inside" of the bar, while `color` adjusts the outline or "stroke" of the bar.
 
-```{r}
+```{r, fig.width=5, fig.height=3}
 # create data
 set.seed(1) # set.seed to get the same data as us!
 data <- tibble(normed_test_scores = rnorm(100))
@@ -200,7 +194,7 @@ hist(data$normed_test_scores, # takes a vector of data
      col = "darkmagenta")
 ```
 
-```{r, include=FALSE}
+```{r, include=FALSE, fig.width=5, fig.height=3}
 # solution
 data %>%
   ggplot(aes(x = normed_test_scores)) + 
@@ -215,7 +209,7 @@ data %>%
 
 2. The `plot()` function makes "Generic X-Y plots"
 
-```{r}
+```{r, fig.width=5, fig.height=3}
 # the most basic plot syntax is plot(x, y)
 # where x and y are vectors of the same length
 plot(storms$wind, storms$pressure)
@@ -226,7 +220,7 @@ If you want to avoid typing the name of the data twice we can use the following 
 
 - Here we can refer to columns using "formula" objects `y ~ x`. You'll see formulas often when doing statistics and they pop up at times when there's a relationship between columns.^[formulas are also a convenient way to capture columns by name when the name isn't in the global environment.]
 
-```{r eval=FALSE}
+```{r eval=FALSE, fig.width=5, fig.height=3}
 plot(y ~ x,                  # plot y by x
      data = [df_name],       # data from [df_name]   
      type = "[type]",        # type (points "p", lines "l", ...) 
@@ -238,7 +232,7 @@ plot(y ~ x,                  # plot y by x
 
 Here's a plot call in action. We start to 
 
-```{r}
+```{r, fig.width=5, fig.height=3}
 plot(pressure~wind,
      data = storms,
      # type = "p", # this is the default plot type
@@ -259,7 +253,7 @@ Replicate the above plot.
   - The vertical line uses `linetype = "dashed"`
   - Don't worry about theme material, unless you want an added challenge.
 
-```{r, include = FALSE}
+```{r, include = FALSE, fig.width=5, fig.height=3}
 storms %>% 
   ggplot(aes(x = wind, y = pressure, color = status)) + 
   geom_point(show.legend = FALSE, shape = 1) + 
@@ -285,7 +279,7 @@ storms %>%
   d. Make a similar bar graph using `ggplot()` ignore aesthetic differences. Notice that your `geom_bar()` call calculates the number of counties per state automatically!
   e. We can also feed `geom_bar()` counts using `geom_bar(stat = "identity")`. Run the code below. What does `count()` do? What does `geom_col()` do?
 
-```{r}
+```{r, fig.width=5, fig.height=3}
 midwest %>%
   count(state) %>%
   ggplot(aes(x = state, y = n)) +
@@ -317,12 +311,12 @@ We can refer to colors by name or by hexidecimal code (e.g. "#8DA0CB"). (r-chart
   b. To figure out `tomato` you'll have to visit the website linked above.
   c. Replace the color names with hexidecimal to make sure you have the right numbers.
   
-```{r, eval = FALSE}
+```{r, eval = FALSE, fig.width=5, fig.height=3}
 base_plot +
   scale_color_manual(values = c("tomato", "blue", "green"))
 ```
 
-```{r, include = FALSE}
+```{r, include = FALSE, fig.width=5, fig.height=3}
 # SOLUTION
 base_plot +
   scale_color_manual(values = c("#ff6347", "#0000ff", "#00ff00"))
