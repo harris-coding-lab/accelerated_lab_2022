@@ -100,6 +100,7 @@ calc_quadratic(5)
 3. Write a function called `solve_quadratic` that takes arguments `a`, `b` and `c` and provides the two roots using the [quadratic formula](https://en.wikipedia.org/wiki/Quadratic_formula).
   
 In our outline, we suggest you:
+
   - Calculate the determinant ($\sqrt{b^2 - 4ac}$) and store as an intermediate value. 
   - Return two values by putting them in a vector. If you stored the roots as `root_1` and `root_2`, then the final line of code in the function should be `c(root_1, root_2)` or, if you prefer, `return(c(root_1, root_2))`.
     
