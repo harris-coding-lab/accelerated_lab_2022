@@ -12,9 +12,7 @@ options(dplyr.summarise.inform = FALSE)
 library(tidyverse)
 library(haven)
 library(readxl)
-college_recent_grads <- read_dta('~/Downloads/Module_5_Data/recent_college_grads.dta')
-
-co <- read_csv("https://raw.githubusercontent.com/fivethirtyeight/data/master/college-majors/recent-grads.csv")
+college_recent_grads <- read_dta("../Data/recent_college_grads.dta")
 ```
 
 # General Guidelines
