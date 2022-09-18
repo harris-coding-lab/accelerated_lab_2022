@@ -1,0 +1,958 @@
+---
+title: 'Accelerated Lecture 7: Writing Functions'
+author: "Harris Coding Camp"
+date: "Summer 2022"
+output:
+  beamer_presentation:
+    includes:
+      in_header: ../resources/header_page_n.tex
+---
+```{r, setup=TRUE, warning=FALSE, message=FALSE, echo=FALSE}
+library(tidyverse)
+#options(dplyr.summarise.inform = FALSE)
+#knitr::opts_chunk$set(collapse = TRUE, comment = "#>", highlight = TRUE, fig.align="center")
+```
+
+## Functions
+
+```{r}
+# example of a function
+circle_area <- function(r) {
+   pi * r ^ 2
+}
+```
+
+ - What are functions and why do we want to use them?
+ - How do we write functions in practice?
+ - What are some solutions to avoid frustrating code?
+ 
+## Motivation
+
+- Grolemund and Wickham chapter 19:
+    - "You should consider writing a function whenever you’ve copied and pasted a block of code more than twice (i.e. you now have three copies of the same code)."
+
+- Darin Christenson refers to the programming mantra __DRY__
+    - "Do not Repeat Yourself (DRY)"
+    - "Functions enable you to perform multiple tasks (that are similar to one another) without copying the same code over and over"
+
+## Instead of repeating code...
+\footnotesize
+```{r, echo = FALSE}
+data <-
+tibble(a = rnorm(100),
+       b = rnorm(100),
+       c = rnorm(100),
+       d = rnorm(100))
+```
+
+```{r issue}
+data %>%
+  mutate(a = (a - min(a)) / (max(a) - min(a)),
+         b = (b - min(b)) / (max(b) - min(b)),
+         c = (c - min(c)) / (max(c) - min(c)),
+         d = (d - min(d)) / (max(d) - min(d)))
+```
+
+## Write a function
+\footnotesize
+```{r}
+rescale_01 <- function(x) {
+  (x - min(x)) / (max(x) - min(x))
+}
+
+data %>%
+  mutate(a = rescale_01(a),
+         b = rescale_01(b),
+         c = rescale_01(c),
+         d = rescale_01(d))
+```
+
+## Function anatomy
+\footnotesize
+The anatomy of a function is as follows:
+
+```{r eval=FALSE}
+function_name <- function(argument_1, argument_2) {
+  do_this(argument_1, argument_2)
+}
+```
+
+Three components of a function:
+
+1. __function name__
+    - specify function name before the assignment operator `<-`
+2. __function arguments__ (sometimes called "inputs" or "arguments")
+    - Inputs that the function takes
+        - can be vectors, data frames, strings, etc.
+    - In above hypothetical code, the function took two inputs `argument_1`,`argument_2`
+    - In "function call," you specify values to assign to these function arguments
+3. __function body__
+    - What the function does to the inputs
+
+## Function anatomy: example
+
++ **arguments**: `x`
++ **body**: `(x - min(x)) / (max(x) - min(x))`
++ assign to **name**: `rescale_01`
+
+```{r}
+rescale_01 <- function(x) {
+  (x - min(x)) / (max(x) - min(x))
+}
+```
+
+The last line of the code will be the value returned by the function!
+
+- We do not explicitly call `return()`
+
+
+## Writing a function: printing output
+
+You start writing code to say Hello to all of your friends.
+
+- You notice it's getting repetitive. ... time for a function!
+
+```{r}
+print("Hello Jasmin!")
+print("Hello Joan!")
+print("Hello Andrew!")
+# and so on...
+```
+
+## Writing a function: parameterize the code
+
+Start with the **body**.
+
+Q: What part of the code is changing? Or what aspects of the code do you want to change?
+
+ - Make this an **argument**
+ 
+## Writing a function: parameterize the code
+
+Start with the **body**.
+
+(Re)write the code to accommodate the parameterization:
+
+```{r}
+# print("Hello Jasmin!") becomes ...
+
+name <- "Jasmin" 
+
+print(paste0("Hello ", name, "!"))
+```
+
+Check several potential inputs to avoid future headaches
+
+## Writing a function: add the structure
+
+Now let's add the **structure** to formally define the new function:
+
+```{r, eval = FALSE}
+# name <- "Jasmin"
+# print(paste0("Hello ", name, "!"))
+
+function(name) {
+  print(paste0("Hello ", name, "!"))
+}
+```
+
++ **arguments**: `name`
++ **body**: `print(paste0("Hello ", name, "!"))`
++ assign to **name**: not yet...
+
+## Writing a function: assign to a name
+
+Try to use **names** that actively tell the user what the code does 
+
+  - We recommend `verb_thing()`
+  
+     - **good**: `calc_size()` or `compare_prices()`  
+     - **bad**: `prices()`, `calc()`, or `fun1()`.
+
+```{r, eval = TRUE}
+# name <- "Jasmin"
+# print(paste0("Hello ", name, "!"))
+
+say_hello_to <- function(name) {
+  print(paste0("Hello ", name, "!"))
+}
+```
+
++ **arguments**: `name`
++ **body**: `print(paste0("Hello ", name, "!"))`
++ assign to **name**: `say_hello_to`
+
+## First example: printing output
+
+Test out different inputs!
+
+```{r}
+say_hello_to("Jasmin")
+say_hello_to("Joan")
+say_hello_to("Andrew")
+
+# Cool this function is vectorized!
+say_hello_to(c("Jasmin", "Joan", "Andrew"))
+```
+
+## Second example: calculating the mean of a sample
+
+Your stats prof asks you to simulate the law of large numbers, by calculating the mean of i.i.d. samples with increasing sample sizes.^[You will learn about this in Stats I]
+
+
+
+## Recall `rnorm(n)` it generates a random sample of size n
+
+\footnotesize
+We want to: calculate the mean of i.i.d. samples with increasing sample sizes.
+
+```{r}
+rnorm(1)
+rnorm(5)
+rnorm(30)
+```
+
+## Too much copy paste
+\footnotesize
+We want to: calculate the *mean* of i.i.d. samples with increasing sample sizes.
+
+```{r}
+mean(rnorm(1))
+mean(rnorm(5))
+mean(rnorm(30))
+# et cetera
+```
+
+## Second example: calculating the mean of a sample
+
+The sample size is changing, so it becomes the **argument**: 
+
+```{r}
+calc_sample_mean <- function(sample_size) {
+  mean(rnorm(sample_size))
+}
+```
+
+  - I call the sample size `sample_size`. 
+    - `n` would also be appropriate.
+  - The **body** is otherwise identical to the code you already wrote.
+
+
+## Function at work
+\footnotesize
+We want to: calculate the *mean* of i.i.d. samples with increasing sample sizes.
+
+- This seems like the same amount of copy paste as before. (We'll improve this soon.)
+- We're still better off. If we change our mind about something or find a bug, we only have to fix it once!
+  
+```{r}
+calc_sample_mean(1)
+calc_sample_mean(5)
+calc_sample_mean(30)
+```
+
+
+## Commenting functions with clear names
+
+For added clarity, you can unnest your code and assign the intermediate results to meaningful names:
+
+```{r}
+calc_sample_mean <- function(sample_size) {
+  
+  our_sample <- rnorm(sample_size)
+  sample_mean <- mean(our_sample) # <- probably overkill
+  
+  sample_mean
+  
+  }
+```
+
+
+## Using `return()`
+
+The last line of code run is returned by default.
+
+- Occassionally you'll want to specify what to return
+
+```{r}
+calc_sample_mean <- function(sample_size) {
+  return(mean(rnorm(sample_size)))
+}
+```
+
+`return()` explicitly tells R what the function will return. 
+
+  - Style guide says only use `return()` to break out of a function early.
+
+## Capturing assigned output
+
+If the last line is an assignment there is no *visible* output
+
+- Avoid this.
+\footnotesize
+
+```{r}
+calc_sample_mean <- function(sample_size) {
+  sample_mean <- mean(rnorm(sample_size)) 
+}
+
+# looks like nothing happened
+calc_sample_mean(1)
+# but we can capture the output with an assignment
+x <- calc_sample_mean(1e6)
+x
+```
+
+
+## One-liners and anonymous functions
+
+If the function can be fit on one line, you can write it without the curly brackets:
+
+```{r}
+calc_sample_mean <- function(n) mean(rnorm(n))
+```
+
+Some settings call for *anonymous functions*, where the function has no name.
+
+```{r eval=FALSE}
+function(n) mean(rnorm(n))
+```
+
+## Always test your code 
+\footnotesize
+Try to foresee the kind of input you expect to use.
+
+```{r}
+calc_sample_mean(0)
+calc_sample_mean(1e6)
+```
+
+We see below that this function is not vectorized. We hoped to get 3 sample means out but only got 1
+
+```{r}
+# read ?rnorm to understand how rnorm interprets vector input
+calc_sample_mean(c(1, 3, 30))
+```
+
+## How to deal with unvectorized functions
+\footnotesize
+If we don't want to change our function, but we want to use on vectors, then we have a couple options
+
+ - Here we are going to use the function `rowwise()`:
+
+```{r}
+# create a tibble to test our function
+sample_tibble <- tibble(sample_sizes = c(1, 3, 10, 30))
+
+# rowwise groups the data by row
+# then our function is applied to each "group"
+sample_tibble %>%
+  rowwise() %>%
+  mutate(sample_means = calc_sample_mean(sample_sizes))
+```
+
+## Complicating the matter.
+
+
+The Stats professor now calls for different paramaterizations of the normal distribution. 
+
+- They want you to re-run your analysis with normals with different means and variances!
+
+
+## Adding additional arguments
+\footnotesize
+If we want to be able to adjust the details of how our function runs, we can add arguments
+
+ - typically, we put "data" arguments first
+ - and then "detail" arguments after
+
+```{r}
+calc_sample_mean <- function(sample_size, 
+                             our_mean, 
+                             our_sd) {
+
+  sample <- rnorm(sample_size, 
+                  mean = our_mean, 
+                  sd = our_sd)
+  
+  mean(sample)
+}
+```
+
+## Setting defaults
+\footnotesize
+If there's a "natural" default, we can set default values for "detail" arguments
+
+
+```{r}
+calc_sample_mean <- function(sample_size, 
+                             our_mean = 0, our_sd = 1) {
+  
+  sample <- rnorm(sample_size, mean = our_mean, sd = our_sd)
+  
+  mean(sample)
+}
+```
+
+```{r}
+# uses the defaults
+calc_sample_mean(sample_size = 10)
+```
+
+## Setting defaults
+
+```{r}
+# we can change one or two defaults. 
+# You can refer by name, or use position
+calc_sample_mean(10, our_sd = 2)
+calc_sample_mean(10, our_mean = 6)
+calc_sample_mean(10, 6, 2)
+```
+
+## Setting defaults
+
+This won't work though:
+
+  - the most important argument is missing!
+  
+```{r eval=FALSE}
+calc_sample_mean(our_mean = 5)
+```
+
+```
+Error in rnorm(sample_size, mean = our_mean, sd = our_sd) : 
+  argument "sample_size" is missing, with no default
+```
+## Another complication
+
+Now your curious about extremes. What happens to the max as we increase our sample size?
+
+## Functions as arguments to other functions
+\footnotesize
+**Before**
+
+```{r}
+calc_sample_mean <- 
+  function(sample_size, our_mean = 0, our_sd = 1) {
+  
+  sample <- rnorm(sample_size,
+                  mean = our_mean, 
+                  sd = our_sd)
+  mean(sample)
+}
+```
+
+## Functions as arguments to other functions
+\footnotesize
+**After**
+
+```{r}
+summarize_sample <- function(sample_size, 
+                             our_mean = 0, 
+                             our_sd = 1, 
+                             summary_func = mean) {
+  
+  sample <- rnorm(sample_size, 
+                  mean = our_mean, 
+                  sd = our_sd)
+  
+  summary_func(sample)
+}
+```
+
+ Use a new descriptive name: `summarize_sample()` 
+ 
+ - `calc_sample_mean()` would be a misleading name
+ 
+
+
+## Functions in functions, in action
+\footnotesize
+```{r}
+# mean(rnorm(10, mean = 0, sd = 1))
+summarize_sample(sample_size = 10) # mean is default!
+
+# max(rnorm(10, mean = 0, sd = 1))
+summarize_sample(sample_size = 10, summary_func = max)
+
+# min(rnorm(10, mean = 0, sd = 1))
+summarize_sample(sample_size = 10, summary_func = min)
+```
+
+ 
+
+
+##  You try
+1. What will happen if we execute the code below? Explain?
+```{r eval=FALSE}
+new.function <- function(a, b) {
+   print(a)
+   print(b)
+}
+
+new.function(6)
+```
+
+##  You try
+
+2. Write a function that takes a vector and replaces negative values with `NA`. (Some data use -99 or similar numbers to represent missing-ness.)
+
+```{r, echo = FALSE}
+replace_neg <- function(x) {
+  ifelse(x < 0, NA, x)
+}
+```
+
+```{r}
+replace_neg(c(-19, 1, 2, 1))
+```
+
+3. Write examples where you use `replace_neg()` with columns in a tibble.
+
+```{r, include=FALSE}
+tibble(x = c(-3, 1, 33, 4)) %>%
+  mutate(x = replace_neg(x))
+```
+
+4. Does your function work on non-numeric inputs?
+
+## Aside: Wait ... what?
+
+```{r}
+# +a < 0  => TRUE
+# -b < 0  => TRUE
+# c < 0   => FALSE
+# d < 0   => FALSE
+
+replace_neg(c("+a", "-b", "c", "d"))
+```
+
+
+Conditional operators work with characters! 
+  
+  - They test alphabetical order
+  - And treat special chars and punctuation as negative!
+  - So, in a real sense, you are greater than `R`
+
+```{r}
+"you" > "R"
+```
+
+
+## Review: Conditional execution
+
+__`if`__ statements allow you to conditionally execute certain blocks of code depending on whether a condition is satisfied
+
+```{r, eval=FALSE}
+if (condition) {
+  # code executed when condition is TRUE
+} else {
+  # code executed when condition is FALSE
+}
+```
+
+
+
+## Suppose you don't like this behavior
+
+We can test whether the input is numeric.
+
+```{r}
+replace_neg <- function(x) {
+  if (is.numeric(x)) {
+    return(ifelse(x < 0, NA, x))  
+  }
+}
+
+out <- replace_neg(c("-a", "b"))
+out
+replace_neg(c(-3, 4))
+```
+
+## Test the function in the context you are interested in!
+
+```{r}
+# oops ... we probably don't want to lose char!
+tibble(char = c("-a", "+b", "c"), 
+       num = c(1, 2, -3 )) %>%
+  mutate(char = replace_neg(char))
+```
+
+
+## Fixing the bug
+
+```{r}
+replace_neg <- function(x) {
+  if (!is.numeric(x)) {
+      return(x)
+  }
+  ifelse(x < 0, NA, x)
+}
+```
+
+
+```{r}
+# better!
+tibble(char = c("-a", "+b", "c"), 
+       num  = c(1, 2, -3)) %>%
+  mutate(char = replace_neg(char),
+         num  = replace_neg(num),)
+```
+
+## Helping a user out.
+\footnotesize
+We may want to warn the user that they did something funny.
+
+```{r}
+replace_neg <- function(x) {
+  if (!is.numeric(x)) {
+    print("Non-numeric input to replace_neg returning x")
+    return(x)  
+  }
+  
+  ifelse(x < 0, NA, x)
+}
+
+replace_neg(c("-a"))
+```
+
+- NB: `message()` makes messages and `stop()` throws errors.
+
+## Using functions for data visualization
+
+You're exploring data and want to make this plot for a variety of city pairings.
+
+```{r, echo = FALSE, message = FALSE, warning=FALSE}
+txhousing %>%
+  filter(city %in% c("Houston", "Galveston")) %>%
+  ggplot(aes(x = as_factor(year), 
+             y = sales, 
+             color = city)) +
+  geom_boxplot(show.legend = FALSE) +
+  labs(color = NULL, y = "Monthly sales", x = "Year") +
+  theme_minimal() +
+  facet_grid(city~., scales = "free_y") +
+  theme(axis.text.x = element_text(angle = 90))
+```
+
+## Using functions for data visualization
+
+Suppose we want another set of plots with Austin and San Antonio. 
+
+- Copy-paste adjust and then ... you decide you want to tinker with the plot more! Now you have to do it twice.
+
+```{r, eval = FALSE, message = FALSE}
+txhousing %>%
+  filter(city == "Houston" | city == "Galveston")) %>%
+  ggplot(aes(x = as_factor(year),
+             y = sales, 
+             color = city)) +
+  geom_boxplot(show.legend = FALSE) +
+  labs(color = NULL,  y = "Monthly sales", x = "Year") +
+  theme_minimal() +
+  facet_grid(city~., scales = "free_y") +
+  theme(axis.text.x = element_text(angle = 90))
+```
+## How would you parameterize this to take arbitrary cities?
+
+```{r, eval = FALSE}
+# zooming in 
+txhousing %>%
+  filter(city == "Houston" | city == "Galveston") ...
+```
+
+
+
+## A function for our plot
+
+```{r}
+sales_box_plot <- function(cities) {
+  txhousing %>%
+    filter(city %in% cities) %>%
+    ggplot(aes(x = as_factor(year), 
+               y = sales, 
+               color = city)) +
+    geom_boxplot(show.legend = FALSE) +
+    labs(color = NULL,  y = "Monthly sales", x = "Year") +
+    theme_minimal() +
+    facet_grid(city~., scales = "free_y") +
+    theme(axis.text.x = element_text(angle = 90))
+}
+```
+
+## Voila!
+```{r}
+sales_box_plot(c("Austin", "San Antonio"))
+```
+## Suppose you want `y` too ...
+
+```{r, eval = FALSE}
+housing_box_plot <- function(cities, y, ylab) {
+  txhousing %>%
+    filter(city %in% cities) %>%
+    ggplot(aes(x = as_factor(year), 
+               y = y, 
+               color = city)) +
+    geom_boxplot(show.legend = FALSE) +
+    labs(color = NULL,  y = ylab, x = "Year") +
+    theme_minimal() +
+    facet_grid(city~., scales = "free_y") +
+    theme(axis.text.x = element_text(angle = 90))
+}
+
+housing_box_plot(c("Austin"), sales, "Monthly sales")
+```
+
+`Error in FUN(X[[i]], ...) : object 'sales' not found`
+
+## Suppose you want `y` too ...
+
+`{{...}}` embrace arguments that refer to columns in your data set.
+
+- This is "sugar" that tells R to look within the data for the variable.
+
+```{r, eval = TRUE}
+housing_box_plot <- function(cities, y, ylab) {
+  txhousing %>%
+    filter(city %in% cities) %>%
+    ggplot(aes(x = as_factor(year), 
+               y = {{ y }}, 
+               color = city)) +
+    geom_boxplot(show.legend = FALSE) +
+    labs(color = NULL,  y = ylab, x = NULL) +
+    theme_minimal() +
+    facet_grid(city~., scales = "free_y") +
+    theme(axis.text.x = element_text(angle = 90))
+}
+```
+## Voila
+```{r, fig.height=2}
+housing_box_plot(c("Austin"), sales, "Monthly sales")
+housing_box_plot(c("Austin"), volume, "Monthly volume")
+```
+
+## Complicating `calc_sample_mean` even further.
+
+Now you're getting really curious and want to see if these ideas hold with different distributions!
+
+Recall:
+```{r}
+calc_sample_mean
+```
+
+
+
+## One approach -- make new functions for each distribution
+\footnotesize
+```{r}
+calc_sample_mean_t <- function(sample_size, our_df) {
+  sample <- rt(sample_size, our_df)
+  mean(sample)
+}
+
+calc_sample_mean_chisq <- function(sample_size, our_df) {
+  sample <- rchisq(sample_size, our_df)
+  mean(sample)
+}
+
+# Fun fact: 2^31 -1 is the largest seed in R
+set.seed(2147483647) 
+calc_sample_mean_t(10,  our_df = 5)
+calc_sample_mean_chisq(10, our_df = 5)
+```
+
+## A sophisticated approach - parameterize the distribution!
+\footnotesize
+- The complication here is each distribution has it's own parameters. `df`, `mean` etc.
+- `...` takes arbitrary arguments which you can pass to another function
+- Warning: `...` (dot-dot-dot) is a bit challenging to use
+
+```{r}
+calc_sample_mean <- function(sample_size, fn = rnorm, ...) {
+  
+  sample <- fn(sample_size, ...)
+  
+  mean(sample)
+}
+
+
+set.seed(2147483647) 
+calc_sample_mean(10, rt, df = 5)
+calc_sample_mean(10, rchisq, df = 5)
+```
+
+## More examples
+\footnotesize
+`...` takes arbitrary named arguments which you can pass to another function
+
+```{r}
+# function(sample_size, fn = rnorm, ...)
+# sample <- rnorm(10)
+calc_sample_mean(10)
+# sample <- rf(4, df1 = 2, df2 = 3)
+calc_sample_mean(4, rf, df1 = 2, df2 = 3)
+# sample <- rbeta(9, shape1 = .3, shape2 = 5)
+calc_sample_mean(9, rbeta, shape1 = .3, shape2 = 5)
+```
+
+## in context
+
+\footnotesize
+```{r}
+tibble(x = c(1, 10, 100, 1000, 1e5)) %>%
+  rowwise() %>%
+  mutate(normal = calc_sample_mean(x, mean = 4, sd = 6),
+         uniform = calc_sample_mean(x, runif, min = 2, max = 6),
+         poisson = calc_sample_mean(x, rpois, lambda = 4))
+```
+
+
+## Recap
+
+- Write functions when you are using a set of operations repeatedly
+- Functions consist of arguments and a body and are usually assigned to a name
+- Functions are for humans
+    - pick names for the function and arguments that are clear and consistent
+- Debug your code as much as you can as you write it.
+    - if you want to use your code with `mutate()`, test the code with vectors
+- Introduced a few sophisticated ways to work with function arguments!
+    - `{{col_name}}` to refer to column names in dplyr context 
+    - `...` to pass arbitrary arguments to functions.
+
+**For more:** See [Chapter 19](https://r4ds.had.co.nz/functions.html) in R for Data Science
+
+## Next steps:
+
+*Lab:*
+
+Today: Writing functions (challenging lab!)
+
+**I can encapsulate code into functions, and debug and apply them!**
+
+*Lecture:*
+
+Tomorrow: Loops and iteration.
+
+
+# Additional material
+
+
+
+## Probability distributions
+\footnotesize
+R has built-in functions for working with distributions.
+
+| | example | what it does? |
+| -- | -- | -- | 
+| r | `rnorm(n)` | generates a random sample of size n | 
+| p | `pnorm(q)` | returns CDF value at q | 
+| q | `qnorm(p)` | returns inverse CDF (the quantile) for a given probability |
+| d | `dnorm(x)` | returns pdf value at x | 
+
+Probability distributions you are familiar with are likely built-in to R.
+
+For example, the binomial distribution has `dbinom()`, `pbinom()`, `qbinom()`, `rbinom()`. The t distribution has `dt()`, `pt()`, `qt()`, `rt()`, etc.
+
+
+Read [this tutorial](https://thomasleeper.com/Rcourse/Tutorials/distributions.html) for more examples.
+
+## We should be familar with `r` functions
+\footnotesize
+- `rnorm()`: random sampling
+
+```{r}
+rnorm(1)
+rnorm(5)
+rnorm(30)
+```
+
+## What are `p` and `q`?
+\footnotesize
+**`pnorm`** returns the probability we observe a value less than or equal to some value `q`.
+
+```{r}
+pnorm(1.96)
+pnorm(0)
+```
+
+**`qnorm`** returns the inverse of `pnorm`. Plug in the probability and get the cutoff.
+
+```{r}
+qnorm(.975)
+qnorm(.5)
+```
+
+This might be easier understood with pictures!
+
+## What are `p` and `q`?
+
+```{r, echo = FALSE, cache = TRUE}
+
+sample <- rnorm(1e5)
+pdf_data <- with(density(sample, n = 1000), tibble(x, y))
+
+cutoff <- 1.96
+
+pdf_data  %>%
+  ggplot(aes(x = x, y = y)) + 
+  geom_line() +
+  geom_ribbon(aes(ymax = y), ymin=0, fill = "red", alpha = .5, 
+              data = pdf_data %>% filter(x < cutoff)) + 
+  labs(x = "z score",  y = "likelihood",  title = "pdf of standard normal", subtitle = "area under curve is the probability of being less than a cutoff") + 
+  annotate("text", x = 0, y = .1, label = "P(x < 1.96) = .975") + 
+  scale_x_continuous(breaks = c(-1.96,  0, 1.96)) +
+  theme_minimal() 
+```
+
+## What are `p` and `q`?
+
+```{r cdf, echo = FALSE}
+cdf <- ecdf(sample)
+
+cdf_data <- 
+  tibble(x = sample,
+         y = cdf(sample))
+
+cdf_data %>%
+  ggplot(aes(x = x, y = y)) + 
+  geom_line() +
+  labs(x = "z score (aka q)", title = "cdf of standard normal (the integeral of the pdf)", y = "F(z) = Pr(x < z)  aka p") + 
+  geom_hline(aes(yintercept = pnorm(cutoff)), linetype = "dashed") +
+  geom_vline(aes(xintercept = cutoff), linetype = "dashed") +
+  scale_x_continuous(breaks = c(-1.96,  0, 1.96)) +
+  scale_y_continuous(breaks = c(0, .25, .5, .75, .975, 1)) + 
+  annotate("text", x = -2, y = .9, label = "plug .975 in qnorm()\nto learn cutoff" ) +
+  annotate("text", x = 1, y = .2, label = "plug 1.96 in pnorm()\nto learn P(x < q)" ) +
+  theme_minimal() 
+```
+
+
+## What is d?
+
+- `dnorm()`: density function, the PDF evaluated at X. 
+
+```{r}
+dnorm(0)
+dnorm(1)
+dnorm(-1)
+```
+
+## What is d?
+
+`dnorm` gives the height of the distribution function. Sometimes this is called a likelihood.
+
+```{r, echo = FALSE}
+
+
+std_normal <-
+  pdf_data %>%
+  ggplot(aes(x = x, y = y)) + 
+  geom_line() +
+  theme_minimal() + 
+  labs(x = "z score",  y = "likelihood",  title = "pdf of standard normal", subtitle = "d functions give height of pdf") + 
+  scale_x_continuous(breaks = c(-1.96,  0, 1.96)) +
+  annotate("text", x = 2.1, y = .241 + .04, label = "dnorm(1) = .24") + 
+  geom_point(x = 1, y = .24, color = "blue") 
+
+std_normal
+```
