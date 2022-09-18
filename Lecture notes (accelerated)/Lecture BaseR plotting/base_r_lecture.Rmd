@@ -1,0 +1,547 @@
+---
+title: 'Lecture 9: Data Visualization (base R)'
+author: "Harris Coding Camp -- Standard Track"
+date: "Summer 2022"
+output:
+  beamer_presentation:
+
+    includes:
+      in_header: /Users/sheng-hao/Dropbox/uchicago/AIP 2nd Year/Coding Camp/Lecture
+        Notes/Lecture 1/header_page_n.tex
+---
+```{r, setup=TRUE, warning=FALSE, message=FALSE, echo=FALSE}
+library(tidyverse)
+library(readr)
+library(maps)
+options(dplyr.summarise.inform = FALSE) 
+housing_data <- read_csv("texas_housing_data.csv")
+```
+
+## Data Visualization: Motivation
+
+Suppose we want to know the following info:
+
+  - What is the annual housing sales in Texas over time?
+  
+  - Can we learn about the relevant housing prices of one city to another in Texas?
+  
+We probably want info about the *average* of housing price, how much the price *varies* over time, and info about the *extremes*
+
+## Data Visualization: Motivation
+Is simply looking at all these data helpful?
+
+  ![](/Users/sheng-hao/Dropbox/uchicago/AIP 2nd Year/Coding Camp/Lecture
+        Notes/Lecture 9/images/9_1.png)
+        
+## Data Visualization: Motivation
+What if we make a plot of annual housing sales over time...
+
+\medskip
+
+```{r, echo=FALSE}
+# prepare new data frame 'annual_sales':
+# sum up monthly volume to get annual volume
+ annual_sales <- 
+  housing_data %>%
+  group_by(year) %>%
+  summarize(total_volume = sum(volume, na.rm = TRUE))
+
+ggplot(data = annual_sales,
+       mapping = aes(x = year, y = total_volume)) +
+  geom_point() + geom_line()
+```
+
+## Data Visualization: Introduction
+
+- Be able to plot in base R
+- Know what types of figures you want
+- Use plots to gain information
+
+  - graphs, including axes, must be labeled properly to allow readers to understand the visualization with ease
+  - variable scales should be portrayed accurately
+  - graphs should be as intuitive as possible
+
+## Data Visualization: Introduction
+
+Two main frameworks which create graphics in R: The *base R* framework, and the *tidyverse*/*ggplot* framework
+
+  - base R: consists of about 30 packages that are always loaded automatically when we open R
+  - It is the oldest way to generate visualizations in R 
+  - *base R* can and is still used to create visualizations, though most visualizations are now generated using the *tidyverse*/*ggplot* framework (more details in Lecture 10)
+  
+## Getting started
+\footnotesize
+First, let's load the data set and call it `pdat`^[For more details, see https://ladal.edu.au/introviz.html]. The data set contains:
+
+  - `Date`: the year when a text was written
+  - `Genre`: the genre of the text
+  - `Text`: the name of the text
+  - `Prepositions`: the relative frequency of prepositions in the text
+  - `Region`: the region in which the text was written
+  - `GenreRedux` collapses the existing genres into five main categories (*Conversational*, *Religious*, *Legal*, *Fiction*, and *NonFiction*) 
+  - `DateRedux` collapses the dates when the texts were composed into five periods (1150-1499, 1500-1599, 1600-1699, 1700-1799, and 1800-1913)
+
+```{r prep4}
+# load online data and call it 'pdat'
+pdat <- base::readRDS(url("https://slcladal.github.io/data/pvd.rda", 
+                          "rb"))
+```
+
+## Getting started
+
+Let's look at the data (first 15 rows):
+
+  ![](/Users/sheng-hao/Dropbox/uchicago/AIP 2nd Year/Coding Camp/Lecture
+        Notes/Lecture 9/images/9_2.png)
+
+## Simplest `plot` code structure
+
+```{r eval=FALSE}
+plot(y ~ x,                  # plot y by x
+     type = "[type]",        # type (points, lines, ...) 
+     data = [df_name],       # data from [df_name]   
+     ylab = "[y variable]",  # add y-axis label 
+     xlab = "[x variable]",  # add x-axis label
+     main = "[title]"        # add title 
+     )                                   
+```
+
+## Understanding `plot()`: Scatter plot
+\footnotesize
+Let’s get started! `plot()` tells R to prepare to make a plot. 
+
+The simplest graph is a *scatter* or *dot plot*. Scatter plots are used when the graph is set up to display the relationship between two variables.
+
+```{r eval=FALSE}
+plot(Prepositions ~ Date,   # plot Prepositions by Date
+     type = "p",            # plot type "p" (points) 
+     data = pdat,           # data from pdat   
+     ylab = "Prepositions (Frequency)",     # add y-axis label 
+     xlab = "Date (year of composition)",   # add x-axis label
+     main = "Prepositions per Year"         # add title 
+     )                                   
+```
+
+## Understanding `plot()`: Scatter plot
+```{r eval=TRUE, echo=FALSE}
+plot(Prepositions ~ Date,   # plot Prepositions by Date
+     type = "p",            # plot type "p" (points) 
+     data = pdat,           # data from pdat   
+     ylab = "Prepositions (frequency)",     # add y-axis label 
+     xlab = "Date (year of composition)",   # add x-axis label
+     main = "Prepositions per Year"         # add title 
+     )                                   
+```
+
+## Understanding `plot()`: Scatter plot + Vertical lines
+\footnotesize
+Often, we may include more info by adding some vertical lines to a plot: 
+
+Syntax: `abline(v = [number], <other options>)`
+
+```{r eval=FALSE}
+plot(Prepositions ~ Date,   # plot Prepositions by Date
+     type = "p",            # plot type "p" (points) 
+     data = pdat,           # data from pdat   
+     ylab = "Prepositions (frequency)",     # add y-axis label 
+     xlab = "Date (year of composition)",   # add x-axis label
+     main = "Prepositions per Year"         # add title 
+     )     
+abline(                  # add a line
+  v = c(1500,1700),      # draw two v (vertical) lines
+  col=c("blue", "red"),  # define line colors
+  lty=c(1,2),            # define line types
+  lwd=c(1,3)             # define line widths
+  )   
+```
+
+## Understanding `plot()`: Scatter plot + Vertical lines
+
+```{r eval=TRUE, echo=FALSE}
+plot(Prepositions ~ Date,   # plot Prepositions by Date
+     type = "p",            # plot type "p" (points) 
+     data = pdat,           # data from pdat   
+     ylab = "Prepositions (Frequency)",     # add y-axis label 
+     xlab = "Date (year of composition)",   # add x-axis label
+     main = "Prepositions per Year"         # add title 
+     )     
+abline(                  # add a line
+  v = c(1500,1700),      # draw two vertical lines
+  col=c("blue", "red"),  # define line colors
+  lty=c(1,2),            # define line types
+  lwd=c(1,3)             # define line widths
+  )  
+```
+
+## Understanding `plot()`: Scatter plot + Horizontal lines
+\footnotesize
+...or by adding some horizontal lines to a plot: 
+
+Syntax: `abline(h = [number], <other options>)`
+
+```{r eval=FALSE}
+plot(Prepositions ~ Date,   # plot Prepositions by Date
+     type = "p",            # plot type "p" (points) 
+     data = pdat,           # data from pdat   
+     ylab = "Prepositions (frequency)",     # add y-axis label 
+     xlab = "Date (year of composition)",   # add x-axis label
+     main = "Prepositions per Year"         # add title 
+     )     
+abline(                  # add a line
+  h = c(100,160),        # draw two h (horizontal) lines
+  col=c("blue", "red"),  # define line colors
+  lty=c(1,2),            # define line types
+  lwd=c(1,3)             # define line widths
+  )   
+```
+
+## Understanding `plot()`: Scatter plot + Horizontal lines
+
+```{r eval=TRUE, echo=FALSE}
+plot(Prepositions ~ Date,   # plot Prepositions by Date
+     type = "p",            # plot type "p" (points) 
+     data = pdat,           # data from pdat   
+     ylab = "Prepositions (Frequency)",     # add y-axis label 
+     xlab = "Date (year of composition)",   # add x-axis label
+     main = "Prepositions per Year"         # add title 
+     )     
+abline(                  # add a line
+  h = c(100,160),        # draw two horizontal lines
+  col=c("blue", "red"),  # define line colors
+  lty=c(1,2),            # define line types
+  lwd=c(1,3)             # define line widths
+  )   
+```
+
+## Understanding `plot()`: Scatter plot + tendency line
+\footnotesize
+We may consider add a linear (regression) line to the scatter plot to see the tendency, and change the color of the points:
+
+Syntax: `abline(lm(df_name$y ~ df_name$x), <other options>)`
+```{r eval=FALSE}
+plot(Prepositions ~ Date,   # plot Prepositions by Date
+     type = "p",            # plot type p (points) 
+     data = pdat,           # data from pdat   
+     ylab = "Prepositions (Frequency)",     # add y-axis label 
+     xlab = "Date (year of composition)",   # add x-axis label
+     main = "Prepositions per Year",        # add title 
+     pch = 20,              # use point symbol 20 (filled circles)
+     col = DateRedux        # define colors by DateRedux
+     )
+abline(                               # add a line
+  lm(pdat$Prepositions ~ pdat$Date),  # draw line of linear model (lm) 
+  col="red"                           # define line color as red
+  )          
+```
+
+## Understanding `plot()`: Scatter plot + tendency line
+```{r eval=TRUE, echo=FALSE}
+plot(Prepositions ~ Date,   # plot Prepositions by Date
+     type = "p",            # plot type p (points) 
+     data = pdat,           # data from pdat   
+     ylab = "Prepositions (Frequency)",     # add y-axis label 
+     xlab = "Date (year of composition)",   # add x-axis label
+     main = "Prepositions per Year",        # add title 
+     pch = 20,              # use point symbol 20 (filled circles)
+     col = DateRedux        # define colors by DateRedux
+     )
+abline(                               # add regression line (y~x) 
+  lm(pdat$Prepositions ~ pdat$Date),  # draw line of linear model (lm) 
+  col="red"                           # define line color as red
+  )      
+```
+
+## Try it yourself
+\footnotesize
+
+1. Use the code below to load the data set and call it `dta9_1`. 
+
+```{r ex2_1a, class.source = NULL, eval = T}
+dta9_1 <-
+  base::readRDS(url("https://slcladal.github.io/data/d03.rda","rb"))
+```
+
+2. Take a look at `dta9_1` -- how many variables (columns) and observations (rows) are included?
+
+3. Find the mean and standard deviation of `Variable1` and `Variable2`.
+
+4. Then, create a scatter plot showing `Variable1` on the x-axis and `Variable2` on the y-axis. You may change the color of the points.
+
+5. Finally, add a linear tendency line. By eyeballing the plot, can you determine the linear relationship between the two variables?
+
+```{r echo=FALSE, eval=FALSE}
+# answer to q2
+nrow(dta9_1)
+ncol(dta9_1)
+dta9_1
+
+# answer to q3
+mean(dta9_1$Variable1, na.rm = TRUE)
+sd(dta9_1$Variable1, na.rm = TRUE)
+mean(dta9_1$Variable2, na.rm = TRUE)
+sd(dta9_1$Variable2, na.rm = TRUE)
+  
+# answer to q4 & q5
+plot(Variable2 ~ Variable1, # plot Variable2 by Variable1
+     type = "p",            # plot type p (points) 
+     data = dta9_1,         # data from dta9_1   
+     ylab = "Variable2",    # add y-axis label 
+     xlab = "Variable1",    # add x-axis label
+     main = "Variable2 vs Variable1",        # add title 
+     pch = 20,              # use point symbol 20 (filled circles)
+     col = "black"          # assign color of the points
+     )
+abline(                                     # add regression line (y~x) 
+  lm(dta9_1$Variable2 ~ dta9_1$Variable1),  # draw line of linear model (lm) 
+  col="red"                                 # define line color as red
+  )  
+```
+
+## `barplot()`: Bar plot
+\footnotesize
+Bar plot displays frequency information across categorical variable levels. 
+
+`barplot()` takes a table with frequency counts as its main argument. As before, we can also specify axes labels and a title. We specify text, grids, and boxes separately after `barplot()`.
+
+```{r eval=FALSE}
+barplot(table(pdat$DateRedux),        # plot Frequency by DateRedux
+     ylab = "Frequency",              # add y-axis label 
+     xlab = "Period of composition",  # add x-axis label 
+     main = "bar plot in base R",     # add title
+     col = c("grey", "pink", "green", "lightgrey", "steelblue"),
+                                      # define color of each bar
+     ylim = c(0, 250)                 # define y-axis limits
+     )                                    
+text(seq(0.7, 5.5, 1.2),              # add label positions (x-axis)
+     table(pdat$DateRedux)+10,        # add label positions (y-axis)
+     table(pdat$DateRedux))           # add labels
+box()                                 # add box
+```
+
+## `barplot()`: Bar plot
+
+```{r eval=TRUE, echo=FALSE}
+barplot(table(pdat$DateRedux),        # plot Frequency by DateRedux
+     ylab = "Frequency",              # add y-axis label 
+     xlab = "Period of composition",  # add x-axis label 
+     main = "bar plot in base R",     # add title
+     col = c("grey", "pink", "green", "lightgrey", "steelblue"),
+                                      # define color of each bar
+     ylim = c(0, 250)                 # define y-axis limits
+     )                                    
+text(seq(0.7, 5.5, 1.2),              # add label positions (x-axis)
+     table(pdat$DateRedux)+10,        # add label positions (y-axis)
+     table(pdat$DateRedux))           # add labels
+box()                                 # add box
+```
+
+## `barplot()`: Grouped bar plot
+\footnotesize
+To create grouped bar plots, we tabulate the variables that we are interested in (e.g. Region)
+```{r eval=FALSE}
+barplot(table(pdat$DateRedux, pdat$Region),  # plot Frequency 
+                                             # by DateRedux and Region
+        beside = T,                          # bars beside each other
+        ylab = "Frequency",                  # add y-axis label 
+        xlab = "Period of composition",      # add x-axis label
+        main = "grouped bar plot in base R", # add title
+        col = c("grey", "pink", "green", "lightgrey", "steelblue"),
+                                             # define color of each bar
+        ylim = c(0, 250)                     # define y-axis limits
+        )                                    
+text(c(seq(1.5, 5.5, 1.0), seq(7.5, 11.5, 1.0)), # add label positions (x-axis)
+     table(pdat$DateRedux, pdat$Region)+10,      # add label positions (y-axis)
+     table(pdat$DateRedux, pdat$Region))         # add labels
+legend("topleft", names(table(pdat$DateRedux)))  # add legend                    
+box()                                            # add box
+```
+
+## `barplot()`: Grouped bar plot
+```{r eval=TRUE, echo=FALSE}
+barplot(table(pdat$DateRedux, pdat$Region),  # plot Frequency by DateRedux and Region
+        beside = T,                          # bars beside each other
+        ylab = "Frequency",                  # add y-axis label 
+        xlab = "Period of composition",      # add x-axis label
+        main = "grouped bar plot in base R", # add title
+        col = c("grey", "pink", "green", "lightgrey", "steelblue"),
+                                             # define color of each bar
+        ylim = c(0, 250)                     # define y-axis limits
+        )                                    
+text(c(seq(1.5, 5.5, 1.0), seq(7.5, 11.5, 1.0)),    # add label positions (x-axis)
+     table(pdat$DateRedux, pdat$Region)+10, # add label positions (y-axis)
+     table(pdat$DateRedux, pdat$Region))    # add labels
+legend("topleft", names(table(pdat$DateRedux))) # add legend                    
+box()                                       # add box
+```
+
+## `boxplot()`: box plot
+\footnotesize
+Boxplots show the relationships between categorical and numeric variables. 
+
+They are very useful because they not only provide measures of central tendency (e.g. median) but also offer info about the distribution (e.g. 1st and 3rd quartile, min, max) of the data.
+
+  ![](/Users/sheng-hao/Dropbox/uchicago/AIP 2nd Year/Coding Camp/Lecture
+        Notes/Lecture 9/images/9_3.png)
+
+## `boxplot()`: box plot
+```{r eval=FALSE}
+boxplot(Prepositions ~ DateRedux, data = pdat)                       
+```
+
+```{r eval=TRUE, echo=FALSE}
+boxplot(Prepositions ~ DateRedux, data = pdat)                       
+```
+
+## `boxplot()`: box plot
+\footnotesize
+We can change the color of the borders and/or fill colors in each box:
+```{r eval=FALSE}
+boxplot(Prepositions ~ DateRedux, data = pdat,
+        border = c("blue", "red", "steelblue", "black", "green"),
+        col = c("grey", "pink", "green", "lightgrey", "steelblue"))                         
+```
+
+## `boxplot()`: box plot
+```{r eval=TRUE, echo=FALSE}
+boxplot(Prepositions ~ DateRedux, data = pdat,
+        border = c("blue", "red", "steelblue", "black", "green"),
+        col = c("grey", "pink", "green", "lightgrey", "steelblue"))                           
+```
+
+## Try it yourself: Plot 1
+\footnotesize
+1. First, load the dataset `weight_chart.txt` and give it a name (e.g. weight_chart). Don't forget to change the working directory if needed! Then, take a look at the dataset.
+```{r eval=FALSE}
+# read the space separated dataframe
+weight_chart <- read.delim("weight_chart.txt") 
+weight_chart
+```
+2. Then, try to replicate the plot in the next slide by modifying the following code. Hint: When choosing type, use `"b"` (which means *both* line and points).
+```{r eval=FALSE}
+plot(??? ~ ???,             # fill in appropriate X and Y
+     type = "b",            # plot type "b" (both line and points) 
+     pch = 15,              # filled square
+     cex = 1.5,             # size of pch symbols
+     data = ???,            # data source
+     ylim = c(?,?),         # fill in the y-axis limits 
+     ylab = "???",    
+     xlab = "???",    
+     main = "???"
+     )                           
+```
+
+## Try it yourself: Plot 1
+```{r results="hide", eval=TRUE, echo=FALSE}
+# read the space separated dataframe
+weight_chart <- read.delim("weight_chart.txt") 
+# view data frame
+weight_chart
+```
+
+```{r eval=TRUE, echo=FALSE}
+# answer
+plot(
+  Weight ~ Age,
+  type="b",
+  pch=15,
+  cex=1.5,
+  data = weight_chart,
+  ylim=c(2,10),
+  xlab="Age (months)",
+  ylab="Weight (kg)",
+  main="Weigh gain during early infant development"
+)
+```
+
+## Try it yourself: Plot 2
+\footnotesize
+1. First, load the dataset and give it a name (e.g. `pdat`). 
+```{r eval=FALSE}
+# load data and call it 'pdat'
+pdat <- base::readRDS(url("https://slcladal.github.io/data/pvd.rda", 
+                          "rb"))
+```
+2. Then, try to replicate the plot in the next slide by modifying the following code. 
+```{r eval=FALSE}
+barplot(table("_fill in_"),       
+     ylab = "[_fill in_]",              
+     xlab = "[_fill in_]",     
+     main = "[_fill in_]",       
+     ylim = c(?, ?),     # fill in the y-axis limits
+     col = rainbow(5)    # a built-in color palettes which can be used 
+                         # to quickly generate color vectors
+     )                                    
+box()                      
+```
+
+## Try it yourself: Plot 2
+```{r eval=TRUE, echo=FALSE}
+# answer
+barplot(table(pdat$GenreRedux),       
+     ylab = "Frequency",              
+     xlab = "Main Genres",     
+     main = "bar plot: GenreRedux",       
+     ylim = c(0, 250),
+     col = rainbow(5)
+     )                                    
+box()                             
+```
+
+## Try it yourself: Plot 3
+\footnotesize
+1. Use the dataset `pdat` and try to replicate the plot in the next slide by modifying the following code. For the color of each box, you can choose whichever you want.
+```{r eval=FALSE}
+boxplot(Prepositions ~ ???, data = ???,
+        col = ???                         
+```
+
+## Try it yourself: Plot 3
+```{r eval=TRUE, echo=FALSE}
+# answer
+boxplot(Prepositions ~ GenreRedux, data = pdat,
+        col = c("grey", "pink", "green", "purple", "blue"))                        
+```
+
+## Appendix: Histogram
+\footnotesize
+It summarizes numeric variables by showing their distribution across bins.
+
+```{r eval=TRUE}
+hist(pdat$Prepositions,
+     xlab = "Prepositions (per 1,000 words)", main = "")
+```
+
+## Appendix: Density Plot
+\footnotesize
+It is a smoothed version of the histogram and is used in the same concept.
+
+```{r eval=TRUE}
+plot(density(pdat$Prepositions),
+     xlab = "Prepositions (per 1,000 words)", main = "")    
+```
+
+## Appendix: Line Plot
+\footnotesize
+It is particularly useful in time series or finance.
+
+```{r eval=TRUE}
+plot(pdat$Prepositions,
+     type = "l",
+     ylab = "Prepositions", main = "")    
+```
+
+## Recap
+
+- Visualizing our data can help lead to powerful insights between variable relationships
+
+  - Making quick plots helps us understand data and makes us aware of data issues
+
+- We've learned how to make commonly used plots, including:
+
+  - scatter plots (with auxiliary lines)
+  - bar plots
+  - box plots
+
+- There are many ways you can visualize your data
+
+  - We can even use `ggplot()` to generate similar plots more conveniently! (more details in Lecture 10) 
